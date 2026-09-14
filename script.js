@@ -1525,36 +1525,75 @@ function selectOption(index) {
   );
 
 }
-
-
 /* =========================================================
    SUBMIT ANSWER
    ========================================================= */
 
 function submitAnswer() {
 
-  if (
-    selectedAnswer ===
-    null
-  ) {
+  // Answer select nahi kiya hai
+  if (selectedAnswer === null) {
 
-    alert(
-      "Please select an answer first."
-    );
+    alert("Please select an answer first.");
 
     return;
+  }
+
+  // Timer stop
+  clearInterval(timerInterval);
+
+
+  /* =======================================================
+     SMART LINK AD SYSTEM
+
+     1st Submit  = AD
+     2nd Submit  = NO AD
+     3rd Submit  = NO AD
+     4th Submit  = AD
+     5th Submit  = NO AD
+     6th Submit  = NO AD
+     7th Submit  = AD
+     ======================================================= */
+
+  let submitCount = Number(
+    localStorage.getItem("quizChampSubmitCount") || 0
+  );
+
+
+  // Valid Submit ko count karo
+  submitCount++;
+
+
+  // Count save karo
+  localStorage.setItem(
+    "quizChampSubmitCount",
+    submitCount
+  );
+
+
+  // 1st, 4th, 7th, 10th... par AD
+  const showAd =
+    ((submitCount - 1) % 3 === 0);
+
+
+  if (showAd) {
+
+    // Naya Smart Link
+    const smartLink =
+      "https://www.profitableratecpmnetwork.com/t4w52zrphg?key=18f0b728ca70616e85a3a69f1a06670f";
+
+
+    // Smart Link ko new tab me open karo
+    window.open(
+      smartLink,
+      "_blank"
+    );
 
   }
 
 
-  clearInterval(
-    timerInterval
-  );
-
-
-  showPage(
-    "adPage"
-  );
+  // Quiz ka next/ad page flow
+  showPage("adPage");
 
 }
 
