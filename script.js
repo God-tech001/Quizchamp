@@ -1320,7 +1320,7 @@ function submitAnswer() {
 
     // Naya Smart Link
     const smartLink =
-      "https://www.profitableratecpmnetwork.com/t4w52zrphg?key=18f0b728ca70616e85a3a69f1a06670f";
+        "https://www.profitableratecpmnetwork.com/t4w52zrphg?key=18f0b728ca70616e85a3a69f1a06670f";
 
 
     // Smart Link ko new tab me open karo
