@@ -1,0 +1,1063 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>QuizChamp</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GFQPXGBFSQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GFQPXGBFSQ');
+</script>
+  <script defer src="script.js"></script>
+</head>
+
+<body>
+
+<!-- ================= LOGIN PAGE ================= -->
+
+<div id="loginPage" class="login-page">
+
+  <div class="login-card">
+
+    <div class="logo">
+      🎓
+    </div>
+
+    <h1>QuizChamp</h1>
+
+    <p class="tagline">
+      Learn • Answer • Earn
+    </p>
+
+    <div class="input-group">
+      <label>Student Name</label>
+      <input
+        type="text"
+        id="nameInput"
+        placeholder="Enter your name"
+      >
+    </div>
+
+    <div class="input-group">
+      <label>Date of Birth</label>
+      <input
+        type="date"
+        id="dobInput"
+      >
+    </div>
+
+    <div class="input-group">
+      <label>Email</label>
+      <input
+        type="email"
+        id="emailInput"
+        placeholder="Enter Gmail ID"
+      >
+    </div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <input
+        type="password"
+        id="passwordInput"
+        placeholder="Create password"
+      >
+    </div>
+
+    <button
+      class="primary-btn"
+      onclick="registerUser()"
+    >
+      🚀 Create QuizChamp Account
+    </button>
+
+    <button
+      class="google-btn"
+      onclick="googleDemoLogin()"
+    >
+      🌐 Continue with Google Demo
+    </button>
+
+    <p
+      style="
+        text-align:center;
+        margin-top:15px;
+        color:#64748b;
+        font-size:12px;
+      "
+    >
+      QuizChamp • Learn and compete every week
+    </p>
+
+  </div>
+
+</div>
+
+
+<!-- ================= MAIN APP ================= -->
+
+<div id="mainApp" style="display:none;">
+
+
+  <!-- ================= HOME ================= -->
+
+  <section
+    id="homePage"
+    class="content-page active"
+  >
+
+    <div class="home-header">
+
+      <div>
+        <p style="color:#64748b;font-size:13px;">
+          Welcome back 👋
+        </p>
+
+        <h2 id="homeName">
+          QuizChamp
+        </h2>
+      </div>
+
+      <div
+        class="avatar"
+        id="homeAvatar"
+      >
+        Q
+      </div>
+
+    </div>
+
+
+    <!-- Stats -->
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <h3>🪙 Coins</h3>
+        <p id="homeCoins">0</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>🏆 Rank</h3>
+        <p id="homeRank">-</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>📝 Quizzes</h3>
+        <p id="homeQuizzes">0</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>🔥 Week Points</h3>
+        <p id="homeWeekCoins">0</p>
+      </div>
+
+    </div>
+
+
+    <h3 class="section-title">
+      Choose Your Challenge
+    </h3>
+
+
+    <!-- Subjects -->
+
+    <div class="subject-grid">
+
+      <button
+        class="subject-card"
+        onclick="startDirectQuiz('Mathematics')"
+      >
+        ➗<br>
+        Mathematics
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startDirectQuiz('Science')"
+      >
+        🔬<br>
+        Science
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startDirectQuiz('English')"
+      >
+        📚<br>
+        English
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startDirectQuiz('General Knowledge')"
+      >
+        🌎<br>
+        General Knowledge
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startDirectQuiz('Computer')"
+      >
+        💻<br>
+        Computer
+      </button>
+
+    </div>
+
+
+    <!-- Reward -->
+
+    <div class="reward-banner">
+
+      <h3>
+        🏆 Weekly Champion Challenge
+      </h3>
+
+      <p>
+        हर सप्ताह सबसे ज्यादा points हासिल करने वाला
+        QuizChamp बनेगा Weekly Champion और पाएगा
+        <strong>₹100 Reward!</strong> 🎁
+      </p>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= QUIZ SUBJECT PAGE ================= -->
+
+  <section
+    id="quizSubjectPage"
+    class="content-page"
+  >
+
+    <h2 class="section-title">
+      🎯 Select Quiz
+    </h2>
+
+    <p style="color:#64748b;margin-bottom:18px;">
+      Choose a subject and start your challenge.
+    </p>
+
+    <div class="subject-grid">
+
+      <button
+        class="subject-card"
+        onclick="startQuiz('Mathematics')"
+      >
+        ➗<br>Mathematics
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startQuiz('Science')"
+      >
+        🔬<br>Science
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startQuiz('English')"
+      >
+        📚<br>English
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startQuiz('General Knowledge')"
+      >
+        🌎<br>General Knowledge
+      </button>
+
+      <button
+        class="subject-card"
+        onclick="startQuiz('Computer')"
+      >
+        💻<br>Computer
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= QUIZ PAGE ================= -->
+
+  <section
+    id="quizPage"
+    class="content-page"
+  >
+
+    <div class="quiz-header">
+
+      <button
+        onclick="exitQuiz()"
+        style="
+          background:#eef2ff;
+          padding:9px 13px;
+          border-radius:12px;
+          color:#4338ca;
+          font-weight:bold;
+        "
+      >
+        ← Exit
+      </button>
+
+      <div
+        class="timer"
+        id="timer"
+      >
+        ⏱️ 30
+      </div>
+
+    </div>
+
+
+    <div class="quiz-card">
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          color:#64748b;
+          font-size:13px;
+        "
+      >
+
+        <span id="quizSubject">
+          Mathematics
+        </span>
+
+        <span id="questionNumber">
+          Question 1
+        </span>
+
+      </div>
+
+
+      <div class="progress-container">
+
+        <div
+          class="progress-bar"
+          id="progressBar"
+          style="width:10%;"
+        ></div>
+
+      </div>
+
+
+      <p
+        id="questionCount"
+        style="
+          color:#64748b;
+          font-size:13px;
+          margin-bottom:12px;
+        "
+      >
+        1 / 10
+      </p>
+
+
+      <h2
+        id="questionText"
+        style="
+          color:#172554;
+          line-height:1.4;
+          font-size:21px;
+        "
+      >
+        Question
+      </h2>
+
+
+      <div
+        id="optionsContainer"
+        style="margin-top:15px;"
+      ></div>
+
+
+      <button
+        class="submit-btn"
+        onclick="submitAnswer()"
+      >
+        Submit Answer →
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= AD / COIN PAGE ================= -->
+
+  <section
+    id="adPage"
+    class="content-page"
+  >
+
+    <div class="quiz-card">
+
+      <h2 style="color:#312e81;">
+        🎉 Answer Submitted!
+      </h2>
+
+      <p
+        style="
+          color:#64748b;
+          margin-top:7px;
+        "
+      >
+        Continue to the next question.
+      </p>
+
+
+      <div class="ad-box">
+
+        <h2>📢 QuizChamp</h2>
+
+        <p style="margin-top:8px;">
+          Keep learning. Keep winning!
+        </p>
+
+      </div>
+
+
+      <div class="coin-card">
+
+        🪙 +1 Point
+
+      </div>
+
+
+      <button
+        class="primary-btn"
+        style="margin-top:15px;"
+        onclick="nextQuestion()"
+      >
+        Continue →
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= COMPLETE PAGE ================= -->
+
+  <section
+    id="completePage"
+    class="content-page"
+  >
+
+    <div class="complete-card">
+
+      <div style="font-size:55px;">
+        🏆
+      </div>
+
+      <h2>
+        Quiz Completed!
+      </h2>
+
+      <p style="color:#64748b;">
+        Great job, QuizChamp!
+      </p>
+
+
+      <div class="quiz-coins">
+        +<span id="quizCoins">0</span> 🪙
+      </div>
+
+
+      <p
+        style="
+          color:#475569;
+          line-height:1.5;
+        "
+      >
+        Your performance has been added to the
+        leaderboard.
+      </p>
+
+
+      <button
+        class="primary-btn"
+        style="margin-top:20px;"
+        onclick="showPage('homePage')"
+      >
+        🏠 Back to Home
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= LEADERBOARD ================= -->
+
+  <section
+    id="leaderboardPage"
+    class="content-page"
+  >
+
+    <h2 class="section-title">
+      🏆 Leaderboard
+    </h2>
+
+    <p
+      style="
+        color:#64748b;
+        margin-bottom:15px;
+      "
+    >
+      Compete with other QuizChamp students.
+    </p>
+
+
+    <div class="leaderboard-card">
+
+      <div class="weekly-reward-note">
+
+        🏆 <strong>Weekly Champion Reward</strong>
+
+        <br><br>
+
+        हर सप्ताह जो QuizChamp सबसे ज्यादा
+        <strong>points</strong> हासिल करेगा,
+        वही बनेगा Weekly Champion और उसे मिलेगा
+        <strong>₹100 का Reward!</strong> 🎁
+
+      </div>
+
+
+      <div id="leaderboardList"></div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= ACCOUNT ================= -->
+
+  <section
+    id="accountPage"
+    class="content-page"
+  >
+
+    <div class="account-card">
+
+      <div
+        class="account-avatar"
+        id="accountAvatar"
+      >
+        Q
+      </div>
+
+      <h2 id="accountName">
+        QuizChamp
+      </h2>
+
+      <p id="accountEmail">
+        -
+      </p>
+
+
+      <div class="stats-grid" style="margin-top:20px;">
+
+        <div class="stat-card">
+          <h3>🪙 Coins</h3>
+          <p id="accountCoins">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>🏆 Rank</h3>
+          <p id="accountRank">-</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>📝 Quizzes</h3>
+          <p id="accountQuizzes">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>💰 Total Coins</h3>
+          <p id="accountTotalCoins">0</p>
+        </div>
+
+      </div>
+
+
+      <h3 class="section-title">
+        📊 Subject Performance
+      </h3>
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <h3>Mathematics</h3>
+          <p id="mathCount">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Science</h3>
+          <p id="scienceCount">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>English</h3>
+          <p id="englishCount">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>GK</h3>
+          <p id="gkCount">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Computer</h3>
+          <p id="computerCount">0</p>
+        </div>
+
+      </div>
+
+
+      <button
+        class="google-btn"
+        style="
+          width:100%;
+          margin-top:20px;
+          background:#fee2e2;
+          color:#b91c1c;
+        "
+        onclick="logout()"
+      >
+        🚪 Logout
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= ADMIN LOGIN ================= -->
+
+  <section
+    id="adminLoginPage"
+    class="content-page"
+  >
+
+    <div class="admin-card">
+
+      <div style="text-align:center;font-size:50px;">
+        🔐
+      </div>
+
+      <h2
+        style="
+          text-align:center;
+          color:#312e81;
+          margin:10px 0;
+        "
+      >
+        Admin Login
+      </h2>
+
+      <p
+        style="
+          text-align:center;
+          color:#64748b;
+          margin-bottom:20px;
+        "
+      >
+        QuizChamp Administration
+      </p>
+
+
+      <div class="input-group">
+
+        <label>
+          Admin Password
+        </label>
+
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="Enter admin password"
+        >
+
+      </div>
+
+
+      <button
+        class="primary-btn"
+        onclick="adminLogin()"
+      >
+        🔓 Login as Admin
+      </button>
+
+
+      <p
+        id="adminError"
+        style="
+          text-align:center;
+          color:#dc2626;
+          margin-top:12px;
+        "
+      ></p>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= ADMIN PANEL ================= -->
+
+  <section
+    id="adminPage"
+    class="content-page"
+  >
+
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:18px;
+      "
+    >
+
+      <div>
+        <p style="color:#64748b;font-size:13px;">
+          Control Center
+        </p>
+
+        <h2 style="color:#312e81;">
+          ⚙️ Admin Panel
+        </h2>
+      </div>
+
+      <button
+        onclick="adminLogout()"
+        style="
+          padding:9px 12px;
+          border-radius:11px;
+          background:#fee2e2;
+          color:#b91c1c;
+          font-weight:bold;
+        "
+      >
+        Logout
+      </button>
+
+    </div>
+
+
+    <!-- Admin Stats -->
+
+    <div class="admin-stat">
+
+      <span style="color:#64748b;">
+        Total Questions
+      </span>
+
+      <strong id="adminQuestionCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <div class="admin-stat">
+
+      <span style="color:#64748b;">
+        Total Students
+      </span>
+
+      <strong id="adminStudentCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <!-- Weekly Winner -->
+
+    <div
+      class="admin-winner"
+      id="adminWeeklyWinner"
+    >
+
+      <div class="admin-winner-title">
+        🏆 Weekly Winner
+      </div>
+
+      <div
+        class="admin-winner-name"
+        id="adminWinnerName"
+      >
+        No Winner Yet
+      </div>
+
+      <div
+        class="admin-winner-coins"
+        id="adminWinnerCoins"
+      >
+        🪙 0 Points
+      </div>
+
+      <div class="admin-winner-reward">
+
+        🎁 Weekly Champion Reward:
+        <strong>₹100</strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- Admin Buttons -->
+
+    <button
+      class="primary-btn"
+      style="margin-bottom:10px;"
+      onclick="openAddQuestion()"
+    >
+      ➕ Add New Question
+    </button>
+
+
+    <button
+      class="google-btn"
+      style="width:100%;"
+      onclick="showAdminQuestions()"
+    >
+      📚 Manage Questions
+    </button>
+
+
+    <!-- Question Area -->
+
+    <div
+      id="adminQuestionArea"
+      style="margin-top:20px;"
+    ></div>
+
+  </section>
+
+
+
+  <!-- ================= ADD QUESTION AREA ================= -->
+
+  <section
+    id="addQuestionPage"
+    class="content-page"
+  >
+
+    <div class="admin-card">
+
+      <h2
+        style="
+          color:#312e81;
+          margin-bottom:18px;
+        "
+      >
+        ➕ Add Question
+      </h2>
+
+
+      <div class="admin-form">
+
+        <label>
+          Subject
+        </label>
+
+        <select id="newQuestionSubject">
+
+          <option value="Mathematics">
+            Mathematics
+          </option>
+
+          <option value="Science">
+            Science
+          </option>
+
+          <option value="English">
+            English
+          </option>
+
+          <option value="General Knowledge">
+            General Knowledge
+          </option>
+
+          <option value="Computer">
+            Computer
+          </option>
+
+        </select>
+
+
+        <label>
+          Question
+        </label>
+
+        <input
+          id="newQuestionText"
+          placeholder="Enter question"
+        >
+
+
+        <label>
+          Option A
+        </label>
+
+        <input
+          id="optionA"
+          placeholder="Option A"
+        >
+
+
+        <label>
+          Option B
+        </label>
+
+        <input
+          id="optionB"
+          placeholder="Option B"
+        >
+
+
+        <label>
+          Option C
+        </label>
+
+        <input
+          id="optionC"
+          placeholder="Option C"
+        >
+
+
+        <label>
+          Option D
+        </label>
+
+        <input
+          id="optionD"
+          placeholder="Option D"
+        >
+
+
+        <label>
+          Correct Answer
+        </label>
+
+        <select id="correctAnswer">
+
+          <option value="0">
+            A
+          </option>
+
+          <option value="1">
+            B
+          </option>
+
+          <option value="2">
+            C
+          </option>
+
+          <option value="3">
+            D
+          </option>
+
+        </select>
+
+
+        <button
+          class="primary-btn"
+          onclick="saveNewQuestion()"
+        >
+          💾 Save Question
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ================= BOTTOM NAV ================= -->
+
+  <nav class="bottom-nav">
+
+    <button
+      id="navHome"
+      onclick="showPage('homePage')"
+    >
+      🏠<br>
+      Home
+    </button>
+
+    <button
+      id="navQuiz"
+      onclick="showQuizTab()"
+    >
+      🎯<br>
+      Quiz
+    </button>
+
+    <button
+      id="navLeaderboard"
+      onclick="showPage('leaderboardPage')"
+    >
+      🏆<br>
+      Rank
+    </button>
+
+    <button
+      id="navAccount"
+      onclick="showPage('accountPage')"
+    >
+      👤<br>
+      Account
+    </button>
+
+    <button
+      id="navAdmin"
+      onclick="openAdmin()"
+    >
+      ⚙️<br>
+      Admin
+    </button>
+
+  </nav>
+
+</div>
+
+</body>
+</html>
