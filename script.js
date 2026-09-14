@@ -1,5 +1,4 @@
- ```javascript
-/* =========================================================
+  /* =========================================================
    QUIZCHAMP
    Main JavaScript
    ========================================================= */
@@ -445,146 +444,6 @@ let timeLeft = 30;
 
 
 /* =========================================================
-   WEEKLY SYSTEM
-   Monday 12:00 AM → New Week
-   Sunday 11:59 PM → Week Ends
-   Timezone: India
-   ========================================================= */
-
-/*
-   Example:
-
-   Monday  = new week
-   Tuesday
-   Wednesday
-   Thursday
-   Friday
-   Saturday
-   Sunday
-
-   Next Monday → weekCoins becomes 0.
-
-   Lifetime coins and totalCoins are NOT reset.
-*/
-
-
-function getCurrentWeekId() {
-
-  const now =
-    new Date();
-
-  const indiaTime =
-    new Date(
-      now.toLocaleString(
-        "en-US",
-        {
-          timeZone:
-            "Asia/Kolkata"
-        }
-      )
-    );
-
-  const day =
-    indiaTime.getDay();
-
-  /*
-     JavaScript:
-     Sunday = 0
-     Monday = 1
-     Tuesday = 2
-     ...
-     Saturday = 6
-  */
-
-  const daysFromMonday =
-    day === 0
-      ? 6
-      : day - 1;
-
-  const monday =
-    new Date(
-      indiaTime
-    );
-
-  monday.setDate(
-    monday.getDate() -
-    daysFromMonday
-  );
-
-  const year =
-    monday.getFullYear();
-
-  const month =
-    String(
-      monday.getMonth() + 1
-    ).padStart(
-      2,
-      "0"
-    );
-
-  const date =
-    String(
-      monday.getDate()
-    ).padStart(
-      2,
-      "0"
-    );
-
-  return (
-    year +
-    "-" +
-    month +
-    "-" +
-    date
-  );
-
-}
-
-
-/* =========================================================
-   CHECK WEEKLY RESET
-   ========================================================= */
-
-async function checkWeeklyReset() {
-
-  if (!user) {
-    return;
-  }
-
-  const currentWeekId =
-    getCurrentWeekId();
-
-  /*
-     If user's saved week is different
-     from current Monday's week,
-     start a fresh weekly score.
-  */
-
-  if (
-    user.weekId !==
-    currentWeekId
-  ) {
-
-    user.weekCoins = 0;
-
-    user.weekId =
-      currentWeekId;
-
-    saveUser();
-
-    /*
-       Keep lifetime coins untouched.
-       Only weekly coins are reset.
-    */
-
-    await updateUserInSupabase();
-
-  }
-
-}
-
-
-/* =========================================================
    PAGE LOAD
    ========================================================= */
 
@@ -595,18 +454,9 @@ document.addEventListener(
     if (!supabaseClient) {
 
       if (user) {
-
-        await checkWeeklyReset();
-
         showMainApp();
-
       } else {
-
-        document.getElementById(
-          "loginPage"
-        ).style.display =
-          "flex";
-
+        document.getElementById("loginPage").style.display = "flex";
       }
 
       return;
@@ -623,34 +473,22 @@ document.addEventListener(
         await supabaseClient.auth.getSession();
 
 
-      if (
-        session &&
-        session.user
-      ) {
+      if (session && session.user) {
 
         await loadUserFromSupabase(
           session.user
         );
-
-        await checkWeeklyReset();
 
         showMainApp();
 
       } else {
 
         if (user) {
-
-          await checkWeeklyReset();
-
           showMainApp();
-
         } else {
-
           document.getElementById(
             "loginPage"
-          ).style.display =
-            "flex";
-
+          ).style.display = "flex";
         }
 
       }
@@ -663,18 +501,11 @@ document.addEventListener(
       );
 
       if (user) {
-
-        await checkWeeklyReset();
-
         showMainApp();
-
       } else {
-
         document.getElementById(
           "loginPage"
-        ).style.display =
-          "flex";
-
+        ).style.display = "flex";
       }
 
     }
@@ -691,13 +522,8 @@ async function loadUserFromSupabase(
   authUser
 ) {
 
-  if (
-    !authUser ||
-    !supabaseClient
-  ) {
-
+  if (!authUser || !supabaseClient) {
     return false;
-
   }
 
 
@@ -708,12 +534,9 @@ async function loadUserFromSupabase(
     await supabaseClient
       .from("profiles")
       .select(
-        "id, username, email, coins, total_coins, quizzes, week_coins, week_id"
+        "id, username, email, coins, total_coins, quizzes"
       )
-      .eq(
-        "id",
-        authUser.id
-      )
+      .eq("id", authUser.id)
       .maybeSingle();
 
 
@@ -725,7 +548,6 @@ async function loadUserFromSupabase(
     );
 
     return false;
-
   }
 
 
@@ -733,51 +555,36 @@ async function loadUserFromSupabase(
 
     user = {
 
-      id:
-        authUser.id,
+      id: authUser.id,
 
       name:
         authUser.user_metadata?.username ||
         "QuizChamp",
 
-      dob:
-        "",
+      dob: "",
 
       email:
-        authUser.email ||
-        "",
+        authUser.email || "",
 
-      coins:
-        0,
+      coins: 0,
 
-      totalCoins:
-        0,
+      totalCoins: 0,
 
-      quizzes:
-        0,
+      quizzes: 0,
 
-      weekCoins:
-        0,
-
-      weekId:
-        getCurrentWeekId(),
+      weekCoins: 0,
 
       subjects: {
 
-        Mathematics:
-          0,
+        Mathematics: 0,
 
-        Science:
-          0,
+        Science: 0,
 
-        English:
-          0,
+        English: 0,
 
-        "General Knowledge":
-          0,
+        "General Knowledge": 0,
 
-        Computer:
-          0
+        Computer: 0
 
       }
 
@@ -787,17 +594,14 @@ async function loadUserFromSupabase(
 
     user = {
 
-      id:
-        profile.id,
+      id: profile.id,
 
       name:
         profile.username ||
         authUser.user_metadata?.username ||
         "QuizChamp",
 
-      dob:
-        user?.dob ||
-        "",
+      dob: "",
 
       email:
         profile.email ||
@@ -805,50 +609,31 @@ async function loadUserFromSupabase(
         "",
 
       coins:
-        Number(
-          profile.coins ||
-          0
-        ),
+        Number(profile.coins || 0),
 
       totalCoins:
-        Number(
-          profile.total_coins ||
-          0
-        ),
+        Number(profile.total_coins || 0),
 
       quizzes:
-        Number(
-          profile.quizzes ||
-          0
-        ),
+        Number(profile.quizzes || 0),
 
       weekCoins:
         Number(
-          profile.week_coins ||
-          0
+          user?.weekCoins || 0
         ),
-
-      weekId:
-        profile.week_id ||
-        getCurrentWeekId(),
 
       subjects:
         user?.subjects || {
 
-          Mathematics:
-            0,
+          Mathematics: 0,
 
-          Science:
-            0,
+          Science: 0,
 
-          English:
-            0,
+          English: 0,
 
-          "General Knowledge":
-            0,
+          "General Knowledge": 0,
 
-          Computer:
-            0
+          Computer: 0
 
         }
 
@@ -906,7 +691,6 @@ async function registerUser() {
     );
 
     return;
-
   }
 
 
@@ -917,21 +701,16 @@ async function registerUser() {
     );
 
     return;
-
   }
 
 
-  if (
-    password.length <
-    6
-  ) {
+  if (password.length < 6) {
 
     alert(
       "Password must be at least 6 characters."
     );
 
     return;
-
   }
 
 
@@ -941,18 +720,15 @@ async function registerUser() {
   } =
     await supabaseClient.auth.signUp({
 
-      email:
-        email,
+      email: email,
 
-      password:
-        password,
+      password: password,
 
       options: {
 
         data: {
 
-          username:
-            name
+          username: name
 
         }
 
@@ -969,7 +745,6 @@ async function registerUser() {
     );
 
     return;
-
   }
 
 
@@ -980,55 +755,38 @@ async function registerUser() {
     );
 
     return;
-
   }
 
 
   user = {
 
-    id:
-      data.user.id,
+    id: data.user.id,
 
-    name:
-      name,
+    name: name,
 
-    dob:
-      dob,
+    dob: dob,
 
-    email:
-      email,
+    email: email,
 
-    coins:
-      0,
+    coins: 0,
 
-    totalCoins:
-      0,
+    totalCoins: 0,
 
-    quizzes:
-      0,
+    quizzes: 0,
 
-    weekCoins:
-      0,
-
-    weekId:
-      getCurrentWeekId(),
+    weekCoins: 0,
 
     subjects: {
 
-      Mathematics:
-        0,
+      Mathematics: 0,
 
-      Science:
-        0,
+      Science: 0,
 
-      English:
-        0,
+      English: 0,
 
-      "General Knowledge":
-        0,
+      "General Knowledge": 0,
 
-      Computer:
-        0
+      Computer: 0
 
     }
 
@@ -1036,14 +794,6 @@ async function registerUser() {
 
 
   saveUser();
-
-
-  /*
-     Save the newly created profile
-     with the current weekly ID.
-  */
-
-  await updateUserInSupabase();
 
 
   alert(
@@ -1080,14 +830,12 @@ function showMainApp() {
 
   document.getElementById(
     "loginPage"
-  ).style.display =
-    "none";
+  ).style.display = "none";
 
 
   document.getElementById(
     "mainApp"
-  ).style.display =
-    "block";
+  ).style.display = "block";
 
 
   showPage(
@@ -1301,9 +1049,7 @@ function showQuizTab() {
 
 function startDirectQuiz(subject) {
 
-  startQuiz(
-    subject
-  );
+  startQuiz(subject);
 
 }
 
@@ -1319,8 +1065,7 @@ function startQuiz(subject) {
 
 
   currentQuestions =
-    questions[subject] ||
-    [];
+    questions[subject] || [];
 
 
   if (
@@ -1333,7 +1078,6 @@ function startQuiz(subject) {
     );
 
     return;
-
   }
 
 
@@ -1341,8 +1085,7 @@ function startQuiz(subject) {
     [...currentQuestions]
       .sort(
         () =>
-          Math.random() -
-          0.5
+          Math.random() - 0.5
       )
       .slice(
         0,
@@ -1350,14 +1093,11 @@ function startQuiz(subject) {
       );
 
 
-  currentQuestionIndex =
-    0;
+  currentQuestionIndex = 0;
 
-  selectedAnswer =
-    null;
+  selectedAnswer = null;
 
-  quizCoins =
-    0;
+  quizCoins = 0;
 
 
   showPage(
@@ -1381,8 +1121,7 @@ function loadQuestion() {
   );
 
 
-  selectedAnswer =
-    null;
+  selectedAnswer = null;
 
 
   const question =
@@ -1447,8 +1186,7 @@ function loadQuestion() {
     );
 
 
-  container.innerHTML =
-    "";
+  container.innerHTML = "";
 
 
   question.options.forEach(
@@ -1525,6 +1263,8 @@ function selectOption(index) {
   );
 
 }
+
+
 /* =========================================================
    SUBMIT ANSWER
    ========================================================= */
@@ -1630,8 +1370,8 @@ function nextQuestion() {
   loadQuestion();
 
 }
-```
-```javascript
+
+
 /* =========================================================
    ADD COIN
    ========================================================= */
@@ -1641,57 +1381,25 @@ async function addCoin() {
   if (!user) return;
 
 
-  /*
-     Monday check
-
-     Agar naya week start ho chuka hai,
-     to sirf weekCoins reset honge.
-
-     Lifetime coins reset nahi honge.
-  */
-
-  await checkWeeklyReset();
-
-
-  /*
-     LIFETIME COINS
-  */
-
   user.coins =
     Number(
       user.coins || 0
-    ) + 1;
+    ) +
+    1;
 
-
-  /*
-     TOTAL LIFETIME COINS
-  */
 
   user.totalCoins =
     Number(
       user.totalCoins || 0
-    ) + 1;
+    ) +
+    1;
 
-
-  /*
-     CURRENT WEEK COINS
-
-     Har earned coin:
-     +1 weekly
-  */
 
   user.weekCoins =
     Number(
       user.weekCoins || 0
-    ) + 1;
-
-
-  /*
-     Current week ID save karo
-  */
-
-  user.weekId =
-    getCurrentWeekId();
+    ) +
+    1;
 
 
   quizCoins++;
@@ -1699,16 +1407,6 @@ async function addCoin() {
 
   saveUser();
 
-
-  /*
-     Supabase me:
-     coins
-     total_coins
-     week_coins
-     week_id
-
-     sab update honge.
-  */
 
   await updateUserInSupabase();
 
@@ -1747,49 +1445,20 @@ async function updateUserInSupabase() {
         email:
           user.email,
 
-        /*
-           Lifetime coins
-        */
-
         coins:
           Number(
             user.coins || 0
           ),
-
-        /*
-           Total lifetime coins
-        */
 
         total_coins:
           Number(
             user.totalCoins || 0
           ),
 
-        /*
-           Total quizzes
-        */
-
         quizzes:
           Number(
             user.quizzes || 0
-          ),
-
-        /*
-           Weekly coins
-        */
-
-        week_coins:
-          Number(
-            user.weekCoins || 0
-          ),
-
-        /*
-           Current week's Monday ID
-        */
-
-        week_id:
-          user.weekId ||
-          getCurrentWeekId()
+          )
 
       })
       .eq(
@@ -1855,18 +1524,10 @@ async function finishQuiz() {
   await updateUserInSupabase();
 
 
-  const quizCoinsElement =
-    document.getElementById(
-      "quizCoins"
-    );
-
-
-  if (quizCoinsElement) {
-
-    quizCoinsElement.textContent =
-      quizCoins;
-
-  }
+  document.getElementById(
+    "quizCoins"
+  ).textContent =
+    quizCoins;
 
 
   showPage(
@@ -1995,11 +1656,6 @@ async function updateUI() {
   if (!user) return;
 
 
-  /*
-     Rank weekly coins ke according
-     calculate hoga.
-  */
-
   const rank =
     await getUserRank();
 
@@ -2010,9 +1666,7 @@ async function updateUI() {
     );
 
 
-  /* =======================================================
-     HOME
-     ======================================================= */
+  /* HOME */
 
   setText(
     "homeName",
@@ -2026,19 +1680,11 @@ async function updateUI() {
   );
 
 
-  /*
-     Ye lifetime/current coins hain.
-  */
-
   setText(
     "homeCoins",
     user.coins || 0
   );
 
-
-  /*
-     Rank WEEKLY coins se hai.
-  */
 
   setText(
     "homeRank",
@@ -2054,19 +1700,13 @@ async function updateUI() {
   );
 
 
-  /*
-     Current week coins
-  */
-
   setText(
     "homeWeekCoins",
     user.weekCoins || 0
   );
 
 
-  /* =======================================================
-     ACCOUNT
-     ======================================================= */
+  /* ACCOUNT */
 
   setText(
     "accountAvatar",
@@ -2086,19 +1726,11 @@ async function updateUI() {
   );
 
 
-  /*
-     Lifetime coins
-  */
-
   setText(
     "accountCoins",
     user.coins || 0
   );
 
-
-  /*
-     Weekly rank
-  */
 
   setText(
     "accountRank",
@@ -2113,10 +1745,6 @@ async function updateUI() {
     user.quizzes || 0
   );
 
-
-  /*
-     Lifetime total coins
-  */
 
   setText(
     "accountTotalCoins",
@@ -2194,7 +1822,7 @@ async function renderLeaderboard() {
 
 
 /* =========================================================
-   LOAD WEEKLY LEADERBOARD FROM SUPABASE
+   LOAD LEADERBOARD FROM SUPABASE
    ========================================================= */
 
 async function loadLeaderboardFromSupabase() {
@@ -2215,31 +1843,21 @@ async function loadLeaderboardFromSupabase() {
   }
 
 
-  /*
-     Current Monday ka ID
-  */
-
-  const currentWeekId =
-    getCurrentWeekId();
-
-
-  let data;
-  let error;
-
-
-  const result =
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("profiles")
       .select(
-        "id, username, email, week_coins, week_id, total_coins, quizzes, created_at"
+        "id, username, email, coins, total_coins, quizzes, created_at"
+      )
+      .order(
+        "coins",
+        {
+          ascending: false
+        }
       );
-
-
-  data =
-    result.data;
-
-  error =
-    result.error;
 
 
   if (error) {
@@ -2264,57 +1882,6 @@ async function loadLeaderboardFromSupabase() {
     return;
 
   }
-
-
-  /*
-     IMPORTANT:
-
-     Agar kisi student ka week_id
-     current Monday ke week_id se
-     match nahi karta,
-
-     to uske weekly coins = 0.
-
-     Isse naya week start hote hi
-     leaderboard fresh dikhega.
-  */
-
-  const weeklyData =
-    (data || [])
-      .map(
-        student => ({
-
-          ...student,
-
-          week_coins:
-            student.week_id ===
-            currentWeekId
-
-              ? Number(
-                  student.week_coins ||
-                  0
-                )
-
-              : 0
-
-        })
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          Number(
-            b.week_coins || 0
-          ) -
-          Number(
-            a.week_coins || 0
-          )
-      );
-
-
-  data =
-    weeklyData;
 
 
   if (
@@ -2360,22 +1927,19 @@ async function loadLeaderboardFromSupabase() {
         index === 0
       ) {
 
-        medal =
-          "🥇";
+        medal = "🥇";
 
       } else if (
         index === 1
       ) {
 
-        medal =
-          "🥈";
+        medal = "🥈";
 
       } else if (
         index === 2
       ) {
 
-        medal =
-          "🥉";
+        medal = "🥉";
 
       }
 
@@ -2384,11 +1948,9 @@ async function loadLeaderboardFromSupabase() {
 
         <div class="
           leaderboard-item
-          ${
-            index === 0
-              ? "top-one"
-              : ""
-          }
+          ${index === 0
+            ? "top-one"
+            : ""}
         ">
 
           <span class="rank-number">
@@ -2421,8 +1983,7 @@ async function loadLeaderboardFromSupabase() {
 
             🪙 ${
               Number(
-                student.week_coins ||
-                0
+                student.coins || 0
               )
             }
 
@@ -2520,7 +2081,7 @@ function updateLeaderboardStudent() {
 
 
 /* =========================================================
-   GET USER WEEKLY RANK
+   GET USER RANK
    ========================================================= */
 
 async function getUserRank() {
@@ -2535,14 +2096,6 @@ async function getUserRank() {
   }
 
 
-  /*
-     Current Monday
-  */
-
-  const currentWeekId =
-    getCurrentWeekId();
-
-
   const {
     data,
     error
@@ -2550,7 +2103,13 @@ async function getUserRank() {
     await supabaseClient
       .from("profiles")
       .select(
-        "id, week_coins, week_id"
+        "id, coins"
+      )
+      .order(
+        "coins",
+        {
+          ascending: false
+        }
       );
 
 
@@ -2564,47 +2123,8 @@ async function getUserRank() {
   }
 
 
-  /*
-     Sirf current week ka score
-     ranking mein count hoga.
-  */
-
-  const weeklyData =
-    data
-      .map(
-        student => ({
-
-          ...student,
-
-          week_coins:
-            student.week_id ===
-            currentWeekId
-
-              ? Number(
-                  student.week_coins ||
-                  0
-                )
-
-              : 0
-
-        })
-      )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          Number(
-            b.week_coins || 0
-          ) -
-          Number(
-            a.week_coins || 0
-          )
-      );
-
-
   const index =
-    weeklyData.findIndex(
+    data.findIndex(
       student =>
         student.id ===
         user.id
@@ -2620,9 +2140,7 @@ async function getUserRank() {
   }
 
 
-  return (
-    index + 1
-  );
+  return index + 1;
 
 }
 
@@ -2742,85 +2260,28 @@ async function renderWeeklyWinner() {
   }
 
 
-  /*
-     Current week
-  */
-
-  const currentWeekId =
-    getCurrentWeekId();
-
-
   const {
-    data: profiles,
+    data,
     error
   } =
     await supabaseClient
       .from("profiles")
       .select(
-        "username, week_coins, week_id"
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Weekly winner error:",
-      error
-    );
-
-
-    nameElement.textContent =
-      "No Winner Yet";
-
-    coinsElement.textContent =
-      "🪙 0 Points";
-
-    return;
-
-  }
-
-
-  /*
-     Old week ke scores ko 0 maana jayega.
-  */
-
-  const weeklyData =
-    (profiles || [])
-      .map(
-        student => ({
-
-          ...student,
-
-          currentWeekCoins:
-            student.week_id ===
-            currentWeekId
-
-              ? Number(
-                  student.week_coins ||
-                  0
-                )
-
-              : 0
-
-        })
+        "username, coins"
       )
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          b.currentWeekCoins -
-          a.currentWeekCoins
-      );
-
-
-  const winner =
-    weeklyData[0];
+      .order(
+        "coins",
+        {
+          ascending: false
+        }
+      )
+      .limit(1);
 
 
   if (
-    !winner ||
-    winner.currentWeekCoins <= 0
+    error ||
+    !data ||
+    data.length === 0
   ) {
 
     nameElement.textContent =
@@ -2834,6 +2295,10 @@ async function renderWeeklyWinner() {
   }
 
 
+  const winner =
+    data[0];
+
+
   nameElement.textContent =
     "🥇 " +
     (
@@ -2844,7 +2309,9 @@ async function renderWeeklyWinner() {
 
   coinsElement.textContent =
     "🪙 " +
-    winner.currentWeekCoins +
+    Number(
+      winner.coins || 0
+    ) +
     " Points";
 
 }
@@ -2876,16 +2343,10 @@ async function renderAdminQuestions() {
   if (!area) return;
 
 
-  /*
-     Weekly winner bhi admin page par
-     show hoga.
-  */
-
   renderWeeklyWinner();
 
 
-  let totalQuestions =
-    0;
+  let totalQuestions = 0;
 
 
   Object.keys(
@@ -2908,9 +2369,7 @@ async function renderAdminQuestions() {
   );
 
 
-  /*
-     GLOBAL STUDENT COUNT
-  */
+  /* GLOBAL STUDENT COUNT */
 
   if (supabaseClient) {
 
@@ -2925,7 +2384,6 @@ async function renderAdminQuestions() {
           {
             count:
               "exact",
-
             head:
               true
           }
@@ -2951,8 +2409,7 @@ async function renderAdminQuestions() {
   }
 
 
-  area.innerHTML =
-    "";
+  area.innerHTML = "";
 
 
   Object.keys(
@@ -3102,7 +2559,8 @@ async function renderAdminQuestions() {
   );
 
 }
-```
+
+
 /* =========================================================
    OPEN ADD QUESTION
    ========================================================= */
@@ -3179,6 +2637,7 @@ function saveNewQuestion() {
     );
 
     return;
+
   }
 
 
@@ -3200,10 +2659,15 @@ function saveNewQuestion() {
       question,
 
     options: [
+
       optionA,
+
       optionB,
+
       optionC,
+
       optionD
+
     ],
 
     answer:
