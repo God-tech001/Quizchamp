@@ -534,7 +534,7 @@ async function loadUserFromSupabase(
     await supabaseClient
       .from("profiles")
       .select(
-        "id, username, email, coins, total_coins, quizzes"
+        "id, username, email, coins, total_coins, quizzes, password"
       )
       .eq("id", authUser.id)
       .maybeSingle();
