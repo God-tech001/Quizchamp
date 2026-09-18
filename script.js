@@ -1288,11 +1288,14 @@ function submitAnswer() {
 
      1st Submit  = AD
      2nd Submit  = NO AD
-     3rd Submit  = NO AD
-     4th Submit  = AD
-     5th Submit  = NO AD
+     3rd Submit  = AD
+     4th Submit  = NO AD
+     5th Submit  = AD
      6th Submit  = NO AD
      7th Submit  = AD
+     8th Sumbit  = NO AD
+     9th Sumbit  = AD
+    
      ======================================================= */
 
   let submitCount = Number(
