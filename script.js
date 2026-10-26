@@ -1,4 +1,4 @@
- /* =========================================================
+  /* =========================================================
    QUIZCHAMP
    Main JavaScript
    ========================================================= */
@@ -437,6 +437,9 @@ let currentQuestionIndex = 0;
 let selectedAnswer = null;
 
 let quizCoins = 0;
+
+// Current question ka result; sirf correct answer par coin milega.
+let answerWasCorrect = false;
 
 let timerInterval = null;
 
@@ -1097,6 +1100,8 @@ function startQuiz(subject) {
 
   selectedAnswer = null;
 
+  answerWasCorrect = false;
+
   quizCoins = 0;
 
 
@@ -1122,6 +1127,8 @@ function loadQuestion() {
 
 
   selectedAnswer = null;
+
+  answerWasCorrect = false;
 
 
   const question =
@@ -1273,70 +1280,102 @@ function submitAnswer() {
 
   // Answer select nahi kiya hai
   if (selectedAnswer === null) {
-
     alert("Please select an answer first.");
-
     return;
   }
 
-  // Timer stop
+  // Ek hi question ko multiple times submit hone se roko
   clearInterval(timerInterval);
 
+  const question = currentQuestions[currentQuestionIndex];
+  answerWasCorrect = !!question && selectedAnswer === question.answer;
+
+  // Result ko coin/reward area ke paas dikhayein.
+  showQuizAnswerFeedback(
+    answerWasCorrect
+      ? "✅ Correct Answer! +1 Coin"
+      : "❌ Wrong Answer — +0 Coins",
+    answerWasCorrect
+  );
 
   /* =======================================================
-     SMART LINK AD SYSTEM
-
-     1st Submit  = AD
-     2nd Submit  = NO AD
-     3rd Submit  = AD
-     4th Submit  = NO AD
-     5th Submit  = AD
-     6th Submit  = NO AD
-     7th Submit  = AD
-     8th Sumbit  = NO AD
-     9th Sumbit  = AD
-    
+     SMART LINK AD SYSTEM — EXISTING LOGIC PRESERVED
+     1st, 4th, 7th, 10th... valid submits par ad
      ======================================================= */
 
   let submitCount = Number(
     localStorage.getItem("quizChampSubmitCount") || 0
   );
 
-
-  // Valid Submit ko count karo
+  // Sirf valid submit ko count karo
   submitCount++;
 
-
-  // Count save karo
   localStorage.setItem(
     "quizChampSubmitCount",
     submitCount
   );
 
-
-  // 1st, 4th, 7th, 10th... par AD
-  const showAd =
-    ((submitCount - 1) % 3 === 0);
-
+  const showAd = ((submitCount - 1) % 3 === 0);
 
   if (showAd) {
-
-    // Naya Smart Link
     const smartLink =
       "https://www.profitableratecpmnetwork.com/t4w52zrphg?key=18f0b728ca70616e85a3a69f1a06670f";
 
-
-    // Smart Link ko new tab me open karo
-    window.open(
-      smartLink,
-      "_blank"
-    );
-
+    window.open(smartLink, "_blank");
   }
 
-
-  // Quiz ka next/ad page flow
+  // Existing quiz/ad page flow remains the same
   showPage("adPage");
+
+}
+
+
+/* =========================================================
+   ANSWER FEEDBACK
+   ========================================================= */
+
+function showQuizAnswerFeedback(message, isCorrect) {
+
+  const adPage = document.getElementById("adPage");
+  if (!adPage) return;
+
+  let feedback = document.getElementById("quizAnswerFeedback");
+
+  if (!feedback) {
+    feedback = document.createElement("div");
+    feedback.id = "quizAnswerFeedback";
+    feedback.setAttribute("role", "status");
+    feedback.style.cssText = [
+      "box-sizing:border-box",
+      "width:100%",
+      "margin:12px 0",
+      "padding:12px 14px",
+      "border-radius:10px",
+      "font-size:16px",
+      "font-weight:700",
+      "text-align:center",
+      "line-height:1.4"
+    ].join(";");
+  }
+
+  feedback.textContent = message;
+  feedback.style.color = isCorrect ? "#166534" : "#b91c1c";
+  feedback.style.background = isCorrect ? "#dcfce7" : "#fee2e2";
+  feedback.style.border = isCorrect
+    ? "1px solid #86efac"
+    : "1px solid #fca5a5";
+
+  // Coin/reward text ke paas lagane ki koshish; nahi mile to adPage ke top par.
+  const coinArea =
+    adPage.querySelector("#earnedCoinText, #coinReward, .earned-coin-text, .coin-reward");
+
+  if (coinArea && coinArea.parentElement) {
+    coinArea.insertAdjacentElement("afterend", feedback);
+  } else if (feedback.parentElement !== adPage) {
+    adPage.prepend(feedback);
+  } else {
+    adPage.prepend(feedback);
+  }
 
 }
 
@@ -1347,29 +1386,22 @@ function submitAnswer() {
 
 function nextQuestion() {
 
-  addCoin();
+  // Sirf correct answer par 1 coin; wrong answer par 0 coin.
+  const shouldAwardCoin = answerWasCorrect;
+  answerWasCorrect = false; // duplicate click se double coin nahi milega
 
+  if (shouldAwardCoin) {
+    addCoin();
+  }
 
   currentQuestionIndex++;
 
-
-  if (
-    currentQuestionIndex >=
-    10
-  ) {
-
+  if (currentQuestionIndex >= 10) {
     finishQuiz();
-
     return;
-
   }
 
-
-  showPage(
-    "quizPage"
-  );
-
-
+  showPage("quizPage");
   loadQuestion();
 
 }
@@ -1577,6 +1609,8 @@ function startTimer() {
           selectedAnswer =
             null;
 
+          answerWasCorrect = false;
+          showQuizAnswerFeedback("⏰ Time is up — +0 Coins", false);
 
           showPage(
             "adPage"
