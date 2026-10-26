@@ -1290,13 +1290,41 @@ function submitAnswer() {
   const question = currentQuestions[currentQuestionIndex];
   answerWasCorrect = !!question && selectedAnswer === question.answer;
 
-  // Result ko coin/reward area ke paas dikhayein.
+
+/* =========================================================
+   SUBMIT ANSWER
+   ========================================================= */
+
+function submitAnswer() {
+
+  // Answer select nahi kiya hai
+  if (selectedAnswer === null) {
+    alert("Please select an answer first.");
+    return;
+  }
+
+  // Ek hi question ko multiple times submit hone se roko
+  clearInterval(timerInterval);
+
+  const question = currentQuestions[currentQuestionIndex];
+  answerWasCorrect = !!question && selectedAnswer === question.answer;
+
+  // Nayi display par sirf Correct ya Wrong
   showQuizAnswerFeedback(
     answerWasCorrect
-      ? "✅ Correct Answer! +1 Coin"
-      : "❌ Wrong Answer — +0 Coins",
+      ? "✅ Correct Answer"
+      : "❌ Wrong Answer",
     answerWasCorrect
   );
+
+  // Purane Coin System mein +1 ya +0
+  const coinArea = document.querySelector(
+    "#earnedCoinText, #coinReward, .earned-coin-text, .coin-reward"
+  );
+
+  if (coinArea) {
+    coinArea.textContent = answerWasCorrect ? "+1 Coin" : "+0 Coins";
+  }
 
   /* =======================================================
      SMART LINK AD SYSTEM — EXISTING LOGIC PRESERVED
@@ -1307,7 +1335,6 @@ function submitAnswer() {
     localStorage.getItem("quizChampSubmitCount") || 0
   );
 
-  // Sirf valid submit ko count karo
   submitCount++;
 
   localStorage.setItem(
@@ -1345,6 +1372,7 @@ function showQuizAnswerFeedback(message, isCorrect) {
     feedback = document.createElement("div");
     feedback.id = "quizAnswerFeedback";
     feedback.setAttribute("role", "status");
+
     feedback.style.cssText = [
       "box-sizing:border-box",
       "width:100%",
@@ -1365,14 +1393,13 @@ function showQuizAnswerFeedback(message, isCorrect) {
     ? "1px solid #86efac"
     : "1px solid #fca5a5";
 
-  // Coin/reward text ke paas lagane ki koshish; nahi mile to adPage ke top par.
-  const coinArea =
-    adPage.querySelector("#earnedCoinText, #coinReward, .earned-coin-text, .coin-reward");
+  // Feedback ko coin/reward text ke paas dikhayein
+  const coinArea = adPage.querySelector(
+    "#earnedCoinText, #coinReward, .earned-coin-text, .coin-reward"
+  );
 
   if (coinArea && coinArea.parentElement) {
     coinArea.insertAdjacentElement("afterend", feedback);
-  } else if (feedback.parentElement !== adPage) {
-    adPage.prepend(feedback);
   } else {
     adPage.prepend(feedback);
   }
