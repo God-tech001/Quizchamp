@@ -1317,14 +1317,14 @@ function submitAnswer() {
     answerWasCorrect
   );
 
-  // Purane Coin System mein +1 ya +0
-  const coinArea = document.querySelector(
-    "#earnedCoinText, #coinReward, .earned-coin-text, .coin-reward"
-  );
+ // Purane Coin System mein +1 ya +0
+const coinArea = document.getElementById("coinReward");
 
-  if (coinArea) {
-    coinArea.textContent = answerWasCorrect ? "+1 Coin" : "+0 Coins";
-  }
+if (coinArea) {
+  coinArea.textContent = answerWasCorrect
+    ? "🪙 +1 Coin"
+    : "🪙 +0 Coins";
+}
 
   /* =======================================================
      SMART LINK AD SYSTEM — EXISTING LOGIC PRESERVED
