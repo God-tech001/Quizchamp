@@ -1,4 +1,4 @@
-/* =========================================================
+  /* =========================================================
    QUIZCHAMP
    Main JavaScript
    ========================================================= */
@@ -438,9 +438,6 @@ let selectedAnswer = null;
 
 let quizCoins = 0;
 
-// Current question ka result; sirf correct answer par coin milega.
-let answerWasCorrect = false;
-
 let timerInterval = null;
 
 let timeLeft = 30;
@@ -508,7 +505,7 @@ document.addEventListener(
       } else {
         document.getElementById(
           "loginPage"
-          ).style.display = "flex";
+        ).style.display = "flex";
       }
 
     }
@@ -1100,8 +1097,6 @@ function startQuiz(subject) {
 
   selectedAnswer = null;
 
-  answerWasCorrect = false;
-
   quizCoins = 0;
 
 
@@ -1127,8 +1122,6 @@ function loadQuestion() {
 
 
   selectedAnswer = null;
-
-  answerWasCorrect = false;
 
 
   const question =
@@ -1278,101 +1271,72 @@ function selectOption(index) {
 
 function submitAnswer() {
 
+  // Answer select nahi kiya hai
   if (selectedAnswer === null) {
+
     alert("Please select an answer first.");
+
     return;
   }
 
+  // Timer stop
   clearInterval(timerInterval);
 
-  const question = currentQuestions[currentQuestionIndex];
-  answerWasCorrect = !!question && selectedAnswer === question.answer;
 
-  showQuizAnswerFeedback(
-    answerWasCorrect
-      ? "✅ Correct Answer"
-      : "❌ Wrong Answer",
-    answerWasCorrect
-  );
+  /* =======================================================
+     SMART LINK AD SYSTEM
 
-const coinArea = document.getElementById("coinReward");
-
-if (coinArea) {
-  coinArea.textContent = answerWasCorrect
-    ? "🪙 +1 Coin"
-    : "🪙 +0 Coins";
-}
+     1st Submit  = AD
+     2nd Submit  = NO AD
+     3rd Submit  = AD
+     4th Submit  = NO AD
+     5th Submit  = AD
+     6th Submit  = NO AD
+     7th Submit  = AD
+     8th Sumbit  = NO AD
+     9th Sumbit  = AD
+    
+     ======================================================= */
 
   let submitCount = Number(
     localStorage.getItem("quizChampSubmitCount") || 0
   );
 
+
+  // Valid Submit ko count karo
   submitCount++;
 
+
+  // Count save karo
   localStorage.setItem(
     "quizChampSubmitCount",
     submitCount
   );
 
-  const showAd = ((submitCount - 1) % 3 === 0);
+
+  // 1st, 4th, 7th, 10th... par AD
+  const showAd =
+    ((submitCount - 1) % 3 === 0);
+
 
   if (showAd) {
+
+    // Naya Smart Link
     const smartLink =
       "https://www.profitableratecpmnetwork.com/t4w52zrphg?key=18f0b728ca70616e85a3a69f1a06670f";
 
-    window.open(smartLink, "_blank");
+
+    // Smart Link ko new tab me open karo
+    window.open(
+      smartLink,
+      "_blank"
+    );
+
   }
 
+
+  // Quiz ka next/ad page flow
   showPage("adPage");
-
-}
-
-
-/* =========================================================
-   ANSWER FEEDBACK
-   ========================================================= */
-
-function showQuizAnswerFeedback(message, isCorrect) {
-
-  const adPage = document.getElementById("adPage");
-  if (!adPage) return;
-
-  let feedback = document.getElementById("quizAnswerFeedback");
-
-  if (!feedback) {
-    feedback = document.createElement("div");
-    feedback.id = "quizAnswerFeedback";
-    feedback.setAttribute("role", "status");
-
-    feedback.style.cssText = [
-      "box-sizing:border-box",
-      "width:100%",
-      "margin:12px 0",
-      "padding:12px 14px",
-      "border-radius:10px",
-      "font-size:16px",
-      "font-weight:700",
-      "text-align:center",
-      "line-height:1.4"
-    ].join(";");
-  }
-
-  feedback.textContent = message;
-  feedback.style.color = isCorrect ? "#166534" : "#b91c1c";
-  feedback.style.background = isCorrect ? "#dcfce7" : "#fee2e2";
-  feedback.style.border = isCorrect
-    ? "1px solid #86efac"
-    : "1px solid #fca5a5";
-
-  const coinArea = adPage.querySelector(
-    "#earnedCoinText, #coinReward, .earned-coin-text, .coin-reward"
-  );
-
-  if (coinArea && coinArea.parentElement) {
-    coinArea.insertAdjacentElement("afterend", feedback);
-  } else {
-    adPage.prepend(feedback);
-  }
 
 }
 
@@ -1383,21 +1347,29 @@ function showQuizAnswerFeedback(message, isCorrect) {
 
 function nextQuestion() {
 
-  const shouldAwardCoin = answerWasCorrect;
-  answerWasCorrect = false;
+  addCoin();
 
-  if (shouldAwardCoin) {
-    addCoin();
-  }
 
   currentQuestionIndex++;
 
-  if (currentQuestionIndex >= 10) {
+
+  if (
+    currentQuestionIndex >=
+    10
+  ) {
+
     finishQuiz();
+
     return;
+
   }
 
-  showPage("quizPage");
+
+  showPage(
+    "quizPage"
+  );
+
+
   loadQuestion();
 
 }
@@ -1605,8 +1577,6 @@ function startTimer() {
           selectedAnswer =
             null;
 
-          answerWasCorrect = false;
-          showQuizAnswerFeedback("⏰ Time is up — +0 Coins", false);
 
           showPage(
             "adPage"
@@ -2985,13 +2955,13 @@ function escapeJS(
   return String(text)
 
     .replace(
-      /\/g,
-      "\\"
+      /\\/g,
+      "\\\\"
     )
 
     .replace(
       /'/g,
-      "\'"
+      "\\'"
     );
 
 }
