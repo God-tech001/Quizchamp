@@ -1,4 +1,4 @@
-  /* =========================================================
+    /* =========================================================
    QUIZCHAMP
    Main JavaScript
    ========================================================= */
@@ -1265,79 +1265,95 @@ function selectOption(index) {
 }
 
 
+
+
 /* =========================================================
    SUBMIT ANSWER
    ========================================================= */
 
+let answerWasCorrect = false;
+let answerSubmitted = false;
+
 function submitAnswer() {
 
-  // Answer select nahi kiya hai
+  // Prevent submitting the same question more than once
+  if (answerSubmitted) return;
+
   if (selectedAnswer === null) {
-
     alert("Please select an answer first.");
-
     return;
   }
 
-  // Timer stop
   clearInterval(timerInterval);
 
+  answerSubmitted = true;
 
-  /* =======================================================
-     SMART LINK AD SYSTEM
+  // Check selected answer
+  const question = currentQuestions[currentQuestionIndex];
 
-     1st Submit  = AD
-     2nd Submit  = NO AD
-     3rd Submit  = AD
-     4th Submit  = NO AD
-     5th Submit  = AD
-     6th Submit  = NO AD
-     7th Submit  = AD
-     8th Sumbit  = NO AD
-     9th Sumbit  = AD
-    
-     ======================================================= */
+  answerWasCorrect = !!question &&
+    selectedAnswer === question.answer;
 
+  // Keep existing ad counter
   let submitCount = Number(
     localStorage.getItem("quizChampSubmitCount") || 0
   );
 
-
-  // Valid Submit ko count karo
   submitCount++;
 
-
-  // Count save karo
   localStorage.setItem(
     "quizChampSubmitCount",
     submitCount
   );
 
-
-  // 1st, 4th, 7th, 10th... par AD
-  const showAd =
-    ((submitCount - 1) % 3 === 0);
-
+  // Existing ad schedule: 1st, 4th, 7th, 10th...
+  const showAd = ((submitCount - 1) % 3 === 0);
 
   if (showAd) {
-
-    // Naya Smart Link
     const smartLink =
       "https://www.profitableratecpmnetwork.com/t4w52zrphg?key=18f0b728ca70616e85a3a69f1a06670f";
 
-
-    // Smart Link ko new tab me open karo
-    window.open(
-      smartLink,
-      "_blank"
-    );
-
+    window.open(smartLink, "_blank");
   }
 
-
-  // Quiz ka next/ad page flow
+  // Open answer/ad page
   showPage("adPage");
 
+  const adPage = document.getElementById("adPage");
+
+  if (adPage) {
+
+    // Display correct/wrong feedback
+    let feedback = document.getElementById("quizAnswerFeedback");
+
+    if (!feedback) {
+      feedback = document.createElement("div");
+      feedback.id = "quizAnswerFeedback";
+      feedback.style.textAlign = "center";
+      feedback.style.fontSize = "22px";
+      feedback.style.fontWeight = "bold";
+      feedback.style.padding = "15px";
+
+      adPage.prepend(feedback);
+    }
+
+    feedback.textContent = answerWasCorrect
+      ? "Correct Answer!"
+      : "Wrong Answer!";
+
+    feedback.style.color = answerWasCorrect
+      ? "green"
+      : "red";
+
+    // Update the existing coin display
+    const coinResult = document.getElementById("coinResult");
+
+    if (coinResult) {
+      coinResult.textContent = answerWasCorrect
+        ? "🪙 +1 Point"
+        : "🪙 +0 Points";
+    }
+  }
 }
 
 
@@ -1345,33 +1361,30 @@ function submitAnswer() {
    NEXT QUESTION
    ========================================================= */
 
-function nextQuestion() {
+async function nextQuestion() {
 
-  addCoin();
+  // Prevent repeated clicks from awarding extra coins
+  if (!answerSubmitted) return;
 
+  // Award coins only for a correct answer
+  if (answerWasCorrect) {
+    await addCoin();
+  }
 
   currentQuestionIndex++;
 
-
-  if (
-    currentQuestionIndex >=
-    10
-  ) {
-
+  if (currentQuestionIndex >= 10) {
     finishQuiz();
-
     return;
-
   }
 
+  // Reset state for the next question
+  selectedAnswer = null;
+  answerWasCorrect = false;
+  answerSubmitted = false;
 
-  showPage(
-    "quizPage"
-  );
-
-
+  showPage("quizPage");
   loadQuestion();
-
 }
 
 
@@ -1383,40 +1396,25 @@ async function addCoin() {
 
   if (!user) return;
 
-
   user.coins =
-    Number(
-      user.coins || 0
-    ) +
-    1;
-
+    Number(user.coins || 0) + 1;
 
   user.totalCoins =
-    Number(
-      user.totalCoins || 0
-    ) +
-    1;
-
+    Number(user.totalCoins || 0) + 1;
 
   user.weekCoins =
-    Number(
-      user.weekCoins || 0
-    ) +
-    1;
-
+    Number(user.weekCoins || 0) + 1;
 
   quizCoins++;
 
-
   saveUser();
-
 
   await updateUserInSupabase();
 
-
   updateUI();
-
 }
+
+
 
 
 /* =========================================================
@@ -2148,16 +2146,13 @@ async function getUserRank() {
 }
 
 
+
 /* =========================================================
    ADMIN OPEN
    ========================================================= */
 
 function openAdmin() {
-
-  showPage(
-    "adminLoginPage"
-  );
-
+  showPage("adminLoginPage");
 }
 
 
@@ -2166,46 +2161,19 @@ function openAdmin() {
    ========================================================= */
 
 function adminLogin() {
+  const password = document.getElementById("adminPassword");
+  const error = document.getElementById("adminError");
 
-  const password =
-    document.getElementById(
-      "adminPassword"
-    ).value;
+  if (!password || !error) return;
 
-
-  const error =
-    document.getElementById(
-      "adminError"
-    );
-
-
-  if (
-    password ===
-    ADMIN_PASSWORD
-  ) {
-
-    error.textContent =
-      "";
-
-
-    document.getElementById(
-      "adminPassword"
-    ).value =
-      "";
-
-
-    showPage(
-      "adminPage"
-    );
-
-
+  if (password.value === ADMIN_PASSWORD) {
+    error.textContent = "";
+    password.value = "";
+    showPage("adminPage");
+    renderAdminQuestions();
   } else {
-
-    error.textContent =
-      "❌ Incorrect admin password.";
-
+    error.textContent = "❌ Incorrect admin password.";
   }
-
 }
 
 
@@ -2214,11 +2182,7 @@ function adminLogin() {
    ========================================================= */
 
 function adminLogout() {
-
-  showPage(
-    "homePage"
-  );
-
+  showPage("homePage");
 }
 
 
@@ -2227,107 +2191,90 @@ function adminLogout() {
    ========================================================= */
 
 async function renderWeeklyWinner() {
+  const nameElement = document.getElementById("adminWinnerName");
+  const coinsElement = document.getElementById("adminWinnerCoins");
 
-  const nameElement =
-    document.getElementById(
-      "adminWinnerName"
-    );
-
-
-  const coinsElement =
-    document.getElementById(
-      "adminWinnerCoins"
-    );
-
-
-  if (
-    !nameElement ||
-    !coinsElement
-  ) {
-
-    return;
-
-  }
-
+  if (!nameElement || !coinsElement) return;
 
   if (!supabaseClient) {
-
-    nameElement.textContent =
-      "No Winner Yet";
-
-    coinsElement.textContent =
-      "🪙 0 Points";
-
+    nameElement.textContent = "Supabase not connected";
+    coinsElement.textContent = "🪙 0 Points";
     return;
-
   }
 
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("username, coins")
+    .order("coins", { ascending: false })
+    .limit(1);
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("profiles")
-      .select(
-        "username, coins"
-      )
-      .order(
-        "coins",
-        {
-          ascending: false
-        }
-      )
-      .limit(1);
-
-
-  if (
-    error ||
-    !data ||
-    data.length === 0
-  ) {
-
-    nameElement.textContent =
-      "No Winner Yet";
-
-    coinsElement.textContent =
-      "🪙 0 Points";
-
+  if (error || !data || data.length === 0) {
+    nameElement.textContent = "No Winner Yet";
+    coinsElement.textContent = "🪙 0 Points";
     return;
-
   }
 
-
-  const winner =
-    data[0];
-
-
-  nameElement.textContent =
-    "🥇 " +
-    (
-      winner.username ||
-      "QuizChamp"
-    );
-
-
+  nameElement.textContent = "🥇 " + (data[0].username || "QuizChamp");
   coinsElement.textContent =
-    "🪙 " +
-    Number(
-      winner.coins || 0
-    ) +
-    " Points";
-
+    "🪙 " + Number(data[0].coins || 0) + " Points";
 }
 
 
 /* =========================================================
-   ADMIN QUESTIONS
+   LOAD QUESTIONS FROM SUPABASE
+   ========================================================= */
+
+async function loadQuestionsFromSupabase() {
+  if (!supabaseClient) {
+    return false;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("quiz_questions")
+    .select("id, subject, question, options, answer")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Question loading error:", error);
+    return false;
+  }
+
+  // Keep the original default questions.
+  questions = JSON.parse(JSON.stringify(defaultQuestions));
+
+  // Add database questions to their respective subjects.
+  (data || []).forEach(function (row) {
+    if (
+      !questions[row.subject] ||
+      typeof row.question !== "string" ||
+      !Array.isArray(row.options) ||
+      row.options.length !== 4 ||
+      !Number.isInteger(Number(row.answer)) ||
+      Number(row.answer) < 0 ||
+      Number(row.answer) > 3
+    ) {
+      return;
+    }
+
+    questions[row.subject].push({
+      id: row.id,
+      question: row.question,
+      options: row.options,
+      answer: Number(row.answer),
+      source: "supabase"
+    });
+  });
+
+  return true;
+}
+
+
+/* =========================================================
+   SHOW ADMIN QUESTIONS
    ========================================================= */
 
 function showAdminQuestions() {
-
   renderAdminQuestions();
-
 }
 
 
@@ -2336,231 +2283,108 @@ function showAdminQuestions() {
    ========================================================= */
 
 async function renderAdminQuestions() {
-
-  const area =
-    document.getElementById(
-      "adminQuestionArea"
-    );
-
+  const area = document.getElementById("adminQuestionArea");
 
   if (!area) return;
 
+  area.textContent = "Loading questions...";
 
-  renderWeeklyWinner();
+  await renderWeeklyWinner();
 
+  const loaded = await loadQuestionsFromSupabase();
 
-  let totalQuestions = 0;
-
-
-  Object.keys(
-    questions
-  ).forEach(
-    subject => {
-
-      totalQuestions +=
-        questions[
-          subject
-        ].length;
-
-    }
-  );
-
-
-  setText(
-    "adminQuestionCount",
-    totalQuestions
-  );
-
-
-  /* GLOBAL STUDENT COUNT */
-
-  if (supabaseClient) {
-
-    const {
-      count,
-      error
-    } =
-      await supabaseClient
-        .from("profiles")
-        .select(
-          "id",
-          {
-            count:
-              "exact",
-            head:
-              true
-          }
-        );
-
-
-    if (!error) {
-
-      setText(
-        "adminStudentCount",
-        count || 0
-      );
-
-    }
-
-  } else {
-
-    setText(
-      "adminStudentCount",
-      students.length
-    );
-
+  if (!loaded && supabaseClient) {
+    area.textContent =
+      "Could not load questions. Check Supabase table permissions.";
+    return;
   }
 
+  let total = 0;
+
+  Object.keys(questions).forEach(function (subject) {
+    total += questions[subject].length;
+  });
+
+  setText("adminQuestionCount", total);
+
+  if (supabaseClient) {
+    const { count, error } = await supabaseClient
+      .from("profiles")
+      .select("id", { count: "exact", head: true });
+
+    if (!error) {
+      setText("adminStudentCount", count || 0);
+    }
+  } else {
+    setText("adminStudentCount", students.length);
+  }
 
   area.innerHTML = "";
 
+  Object.keys(questions).forEach(function (subject) {
+    const heading = document.createElement("h3");
 
-  Object.keys(
-    questions
-  ).forEach(
-    subject => {
+    heading.textContent = subject;
+    heading.style.color = "#312e81";
+    heading.style.marginTop = "20px";
 
-      const heading =
-        document.createElement(
-          "h3"
-        );
+    area.appendChild(heading);
 
+    questions[subject].forEach(function (q, index) {
+      const div = document.createElement("div");
+      div.className = "admin-question";
 
-      heading.style.color =
-        "#312e81";
+      const title = document.createElement("strong");
+      title.textContent = "Question " + (index + 1);
+      div.appendChild(title);
 
+      const questionText = document.createElement("p");
+      questionText.textContent = q.question;
+      questionText.style.margin = "8px 0";
+      questionText.style.color = "#172554";
+      div.appendChild(questionText);
 
-      heading.style.marginTop =
-        "20px";
+      const options = document.createElement("div");
 
+      q.options.forEach(function (option, optionIndex) {
+        const line = document.createElement("div");
+        line.textContent =
+          ["A", "B", "C", "D"][optionIndex] + ". " + option;
+        options.appendChild(line);
+      });
 
-      heading.textContent =
-        subject;
+      div.appendChild(options);
 
+      const answer = document.createElement("p");
+      answer.textContent =
+        "Correct answer: " +
+        (["A", "B", "C", "D"][Number(q.answer)] || "?");
+      answer.style.color = "#047857";
+      answer.style.fontWeight = "bold";
+      answer.style.marginTop = "8px";
+      div.appendChild(answer);
 
-      area.appendChild(
-        heading
-      );
+      // Only database questions can be deleted from Supabase.
+      if (q.source === "supabase" && q.id != null) {
+        const deleteButton = document.createElement("button");
 
+        deleteButton.className = "delete-btn";
+        deleteButton.textContent = "🗑️ Delete";
 
-      questions[
-        subject
-      ].forEach(
-        (
-          q,
-          index
-        ) => {
+        deleteButton.addEventListener("click", function () {
+          deleteQuestion(subject, q.id);
+        });
 
-          const div =
-            document.createElement(
-              "div"
-            );
+        div.appendChild(deleteButton);
+      } else {
+        const note = document.createElement("small");
+        note.textContent = "Default question";
+        div.appendChild(note);
+      }
 
-
-          div.className =
-            "admin-question";
-
-
-          div.innerHTML = `
-
-            <strong>
-              Question ${
-                index + 1
-              }
-            </strong>
-
-
-            <p style="
-              margin-top:8px;
-              margin-bottom:8px;
-              color:#172554;
-            ">
-
-              ${escapeHTML(
-                q.question
-              )}
-
-            </p>
-
-
-            <small>
-
-              A. ${
-                escapeHTML(
-                  q.options[0]
-                )
-              }
-
-              <br>
-
-              B. ${
-                escapeHTML(
-                  q.options[1]
-                )
-              }
-
-              <br>
-
-              C. ${
-                escapeHTML(
-                  q.options[2]
-                )
-              }
-
-              <br>
-
-              D. ${
-                escapeHTML(
-                  q.options[3]
-                )
-              }
-
-            </small>
-
-
-            <br><br>
-
-
-            <strong style="color:#047857;">
-
-              Correct:
-              ${
-                ["A","B","C","D"][
-                  q.answer
-                ]
-              }
-
-            </strong>
-
-
-            <br>
-
-
-            <button
-              class="delete-btn"
-              onclick="
-                deleteQuestion(
-                  '${escapeJS(subject)}',
-                  ${index}
-                )
-              "
-            >
-              🗑️ Delete
-            </button>
-
-          `;
-
-
-          area.appendChild(
-            div
-          );
-
-        }
-      );
-
-    }
-  );
-
+      area.appendChild(div);
+    });
+  });
 }
 
 
@@ -2569,207 +2393,137 @@ async function renderAdminQuestions() {
    ========================================================= */
 
 function openAddQuestion() {
-
-  showPage(
-    "addQuestionPage"
-  );
-
+  showPage("addQuestionPage");
 }
 
 
 /* =========================================================
-   SAVE NEW QUESTION
+   SAVE NEW QUESTION TO SUPABASE
    ========================================================= */
 
-function saveNewQuestion() {
+async function saveNewQuestion() {
+  if (!supabaseClient) {
+    alert("Supabase is not connected.");
+    return;
+  }
 
-  const subject =
-    document.getElementById(
-      "newQuestionSubject"
-    ).value;
+  const subject = document.getElementById("newQuestionSubject").value;
+  const question = document.getElementById("newQuestionText").value.trim();
+
+  const optionA = document.getElementById("optionA").value.trim();
+  const optionB = document.getElementById("optionB").value.trim();
+  const optionC = document.getElementById("optionC").value.trim();
+  const optionD = document.getElementById("optionD").value.trim();
+
+  const answer = Number(
+    document.getElementById("correctAnswer").value
+  );
+
+  const allowedSubjects = [
+    "Mathematics",
+    "Science",
+    "English",
+    "General Knowledge",
+    "Computer"
+  ];
+
+  if (!allowedSubjects.includes(subject)) {
+    alert("Please select a valid subject.");
+    return;
+  }
+
+  if (!question || !optionA || !optionB || !optionC || !optionD) {
+    alert("Please fill all fields.");
+    return;
+  }
+
+  if (!Number.isInteger(answer) || answer < 0 || answer > 3) {
+    alert("Please select the correct answer.");
+    return;
+  }
+
+  const button = document.activeElement;
+  if (button && button.tagName === "BUTTON") {
+    button.disabled = true;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("quiz_questions")
+      .insert([{
+        subject: subject,
+        question: question,
+        options: [optionA, optionB, optionC, optionD],
+        answer: answer
+      }])
+      .select("id, subject, question, options, answer")
+      .single();
+
+    if (error) {
+      console.error("Save question error:", error);
+      alert("Question save nahi hua: " + error.message);
+      return;
+    }
+
+    alert("✅ Question Supabase mein save ho gaya!");
+
+    document.getElementById("newQuestionText").value = "";
+    document.getElementById("optionA").value = "";
+    document.getElementById("optionB").value = "";
+    document.getElementById("optionC").value = "";
+    document.getElementById("optionD").value = "";
+
+    await renderAdminQuestions();
+    showPage("adminPage");
+
+  } finally {
+    if (button && button.tagName === "BUTTON") {
+      button.disabled = false;
+    }
+  }
+}
 
 
-  const question =
-    document.getElementById(
-      "newQuestionText"
-    ).value.trim();
+/* =========================================================
+   DELETE QUESTION FROM SUPABASE
+   ========================================================= */
 
+async function deleteQuestion(subject, id) {
+  if (!supabaseClient) {
+    alert("Supabase is not connected.");
+    return;
+  }
 
-  const optionA =
-    document.getElementById(
-      "optionA"
-    ).value.trim();
+  const confirmed = confirm(
+    "Kya tum is database question ko delete karna chahte ho?"
+  );
 
+  if (!confirmed) return;
 
-  const optionB =
-    document.getElementById(
-      "optionB"
-    ).value.trim();
+  const { data, error } = await supabaseClient
+    .from("quiz_questions")
+    .delete()
+    .eq("id", id)
+    .select("id");
 
+  if (error) {
+    console.error("Delete question error:", error);
+    alert("Delete nahi hua: " + error.message);
+    return;
+  }
 
-  const optionC =
-    document.getElementById(
-      "optionC"
-    ).value.trim();
-
-
-  const optionD =
-    document.getElementById(
-      "optionD"
-    ).value.trim();
-
-
-  const answer =
-    Number(
-      document.getElementById(
-        "correctAnswer"
-      ).value
-    );
-
-
-  if (
-    !question ||
-    !optionA ||
-    !optionB ||
-    !optionC ||
-    !optionD
-  ) {
-
+  if (!data || data.length === 0) {
     alert(
-      "Please fill all fields."
+      "Question delete nahi hua. Supabase RLS policy ya admin permission check karo."
     );
-
     return;
-
   }
 
+  alert("✅ Question deleted.");
 
-  if (
-    !questions[subject]
-  ) {
-
-    questions[subject] =
-      [];
-
-  }
-
-
-  questions[
-    subject
-  ].push({
-
-    question:
-      question,
-
-    options: [
-
-      optionA,
-
-      optionB,
-
-      optionC,
-
-      optionD
-
-    ],
-
-    answer:
-      answer
-
-  });
-
-
-  localStorage.setItem(
-    "quizChampQuestions",
-    JSON.stringify(
-      questions
-    )
-  );
-
-
-  alert(
-    "✅ Question added successfully!"
-  );
-
-
-  document.getElementById(
-    "newQuestionText"
-  ).value = "";
-
-
-  document.getElementById(
-    "optionA"
-  ).value = "";
-
-
-  document.getElementById(
-    "optionB"
-  ).value = "";
-
-
-  document.getElementById(
-    "optionC"
-  ).value = "";
-
-
-  document.getElementById(
-    "optionD"
-  ).value = "";
-
-
-  showPage(
-    "adminPage"
-  );
-
-
-  renderAdminQuestions();
-
+  await renderAdminQuestions();
 }
 
-
-/* =========================================================
-   DELETE QUESTION
-   ========================================================= */
-
-function deleteQuestion(
-  subject,
-  index
-) {
-
-  const confirmDelete =
-    confirm(
-      "Delete this question?"
-    );
-
-
-  if (
-    !confirmDelete
-  ) {
-
-    return;
-
-  }
-
-
-  questions[
-    subject
-  ].splice(
-    index,
-    1
-  );
-
-
-  localStorage.setItem(
-    "quizChampQuestions",
-    JSON.stringify(
-      questions
-    )
-  );
-
-
-  renderAdminQuestions();
-
-}
 
 
 /* =========================================================
